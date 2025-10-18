@@ -5,16 +5,15 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 
+// Explicitly require models early to prevent Mongoose schema errors/crashes
+const Student = require('./models/Student'); 
+const Teacher = require('./models/Teacher'); 
+
+// Require the router containing all API logic
 const studentRoutes = require('./routes/studentRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// === NEW: Explicitly require models early to prevent crash ===
-// This ensures Mongoose knows about the schemas before the routes are hit.
-const Student = require('./models/Student'); 
-const Teacher = require('./models/Teacher'); 
-// ==========================================================
 
 // === MIDDLEWARE ===
 
@@ -25,7 +24,10 @@ app.use(cors());    
 app.use(express.json());
 
 // 3. Serve Static Files Configuration (Fixes Cannot GET /index.html)
+// Path assumes HTML files are in the sibling folder 'Digital Coin'
 const frontendPath = path.join(__dirname, '..', 'Digital Coin');
+
+// Express serves static files (HTML, CSS, JS) from the 'Digital Coin' folder
 app.use(express.static(frontendPath));
 
 // === MONGODB CONNECTION ===
@@ -35,7 +37,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 // === ROUTES ===
 
-// 1. Explicitly serve index.html when the root URL is accessed.
+// 1. Explicitly serve index.html when the root URL (http://localhost:3000/) is accessed.
 app.get('/', (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
 });
@@ -43,7 +45,7 @@ app.get('/', (req, res) => {
 // 2. Primary route for student data and actions (e.g., /api/students/dashboard/:id)
 app.use('/api/students', studentRoutes);
 
-// 3. Secondary route for Teacher placeholder actions (e.g., /api/teachers/login)
+// 3. Secondary route for Teacher actions (e.g., /api/teachers/login)
 app.use('/api', studentRoutes); 
 
 
